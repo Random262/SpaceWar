@@ -2,6 +2,8 @@ extends Area2D
 
 var armor = 4 setget set_armor
 const scn_laser = preload("res://scenes/laser_ship.tscn")
+const scn_explosion = preload("res://scenes/explosion.tscn")
+const scn_flash = preload("res://scenes/flash.tscn")
 
 func _ready():
 	set_process(true)
@@ -32,8 +34,12 @@ func shoot():
 	pass	
 	
 func set_armor(new_value):
+	if new_value < armor:
+		utils.main_node.add_child(scn_flash.instance())
 	armor = new_value
-	if armor <= 0: queue_free()
+	if armor <= 0: 
+		create_explosion()
+		queue_free()
 	pass
 		
 func create_laser(pos):
@@ -41,3 +47,10 @@ func create_laser(pos):
 	laser.set_pos(pos)
 	utils.main_node.add_child(laser)
 	pass	
+	
+func create_explosion():
+	var explosion = scn_explosion.instance()
+	explosion.set_pos(get_pos())
+	utils.main_node.add_child(explosion)
+	pass
+
