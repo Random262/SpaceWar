@@ -6,6 +6,7 @@ const scn_flare = preload("res://scenes/flare.tscn")
 
 func _ready():
 	set_process(true)
+	add_to_group("bullet")
 	create_flare()
 	yield(get_node("vis_notifier"), "exit_screen")
 	queue_free()

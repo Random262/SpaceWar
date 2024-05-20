@@ -1,9 +1,15 @@
 extends Area2D
 
 var armor = 4 setget set_armor
+var is_double_shooting = false setget set_double_shooting
 const scn_laser = preload("res://scenes/laser_ship.tscn")
 const scn_explosion = preload("res://scenes/explosion.tscn")
 const scn_flash = preload("res://scenes/flash.tscn")
+
+signal armor_changed
+
+    
+
 
 func _ready():
 	set_process(true)
@@ -24,28 +30,45 @@ func _process(delta):
 	pass	
 	
 func shoot():
-	while true:
-		var pos_left = get_node("cannons/left").get_global_pos()
-		var pos_right = get_node("cannons/right").get_global_pos()
-		create_laser(pos_left)
-		create_laser(pos_right)
+	
+	var pos_left = get_node("cannons/left").get_global_pos()
+	var pos_right = get_node("cannons/right").get_global_pos()
+	create_laser(pos_left)
+	create_laser(pos_right)
 		
-		yield(utils.create_timer(0.25), "timeout")
+	if is_double_shooting:
+		var laser_left = create_laser(pos_left)
+		var laser_right = create_laser(pos_right)
+		laser_left.velocity.x = -25
+		laser_right.velocity.x = 25
+	var test = utils.create_timer(0.25).connect("timeout", self, "shoot")
 	pass	
 	
 func set_armor(new_value):
+	if new_value > 4: 
+		return
 	if new_value < armor:
+		audio_player.play("hit_ship")
 		utils.main_node.add_child(scn_flash.instance())
 	armor = new_value
+	emit_signal("armor_changed", armor)
 	if armor <= 0: 
 		create_explosion()
 		queue_free()
+	pass
+	
+func set_double_shooting(new_value):
+	is_double_shooting = new_value	
+	if is_double_shooting:
+		yield(utils.create_timer(5), "timeout")
+		is_double_shooting = false
 	pass
 		
 func create_laser(pos):
 	var laser = scn_laser.instance()
 	laser.set_pos(pos)
 	utils.main_node.add_child(laser)
+	return laser
 	pass	
 	
 func create_explosion():
@@ -53,4 +76,5 @@ func create_explosion():
 	explosion.set_pos(get_pos())
 	utils.main_node.add_child(explosion)
 	pass
-
+	
+	

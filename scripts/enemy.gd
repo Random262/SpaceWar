@@ -27,8 +27,11 @@ func _on_area_enter(other):
 func set_armor(new_value):
 	if is_queued_for_deletion():
 		return
+	if new_value < armor:	
+		audio_player.play("hit_enemy")
 	armor = new_value
 	if armor <= 0: 
+		utils.find_node("tex_score").score += 5
 		create_explosion()
 		queue_free()
 	pass
